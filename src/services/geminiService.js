@@ -36,9 +36,12 @@ export const analyzeCodeWithGemini = async (code, language) => {
             \`\`\`
             
             Provide:
-            1. A line-by-line explanation of what the code does
+            1. An explanation of what the code does and how it works. Don't teach the basics but focus on the concept, give a little background of the concept and then start explaining the code. Don't leave anything out.
             2. The overall functionality and purpose of the code, including inputs, outputs, and run. Time/space complexity analysis
-            4. Three related LeetCode problems that use similar concepts (with difficulty levels)
+            3. Three related LeetCode problems that use similar concepts (with difficulty levels)
+            4. If the code is wrong, point out the mistake and tell the user how to fix it and teach the logic of what it should've been and what it actually was.
+            5. Don't use highlights for output, like making the headings bold just give simple text with line breaks though wherever necessary.
+            6. If in the code in a comment you find a question, answer it as well.
             
             Format the response as a JSON object with the following structure:
             {
