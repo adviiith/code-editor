@@ -1,0 +1,189 @@
+.recycle-bin-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .recycle-bin-header {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .recycle-bin-header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+  }
+  
+  .recycle-bin-description {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin: 0;
+  }
+  
+  .recycle-bin-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: center;
+  }
+  
+  .search-box {
+    flex: 1;
+    min-width: 200px;
+  }
+  
+  .search-box input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: var(--surface-color);
+    color: var(--text-primary);
+  }
+  
+  .filter-select {
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: var(--surface-color);
+    color: var(--text-primary);
+  }
+  
+  .empty-bin-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 15px;
+    background-color: var(--danger-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .empty-bin-button:hover {
+    background-color: var(--danger-hover);
+  }
+  
+  .empty-recycle-bin {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 50px 0;
+    color: var(--text-tertiary);
+    gap: 15px;
+  }
+  
+  .deleted-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .deleted-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--surface-color);
+  }
+  
+  .deleted-item-icon {
+    color: var(--text-secondary);
+    margin-right: 15px;
+  }
+  
+  .deleted-item-info {
+    flex: 1;
+  }
+  
+  .deleted-item-info h3 {
+    margin: 0 0 5px 0;
+    font-size: 1rem;
+    font-weight: 500;
+  }
+  
+  .deleted-item-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    font-size: 0.8rem;
+    color: var(--text-tertiary);
+  }
+  
+  .deleted-item-type {
+    padding: 2px 8px;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 12px;
+    font-size: 0.7rem;
+  }
+  
+  .days-left {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .days-left.warning {
+    color: var(--danger-color);
+  }
+  
+  .deleted-item-actions {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .restore-button,
+  .delete-button {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .restore-button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+  }
+  
+  .restore-button:hover {
+    background-color: var(--primary-hover);
+  }
+  
+  .delete-button {
+    background-color: transparent;
+    color: var(--danger-color);
+    border: 1px solid var(--danger-color);
+  }
+  
+  .delete-button:hover {
+    background-color: rgba(239, 68, 68, 0.1);
+  }
+  
+  @media (max-width: 768px) {
+    .deleted-item {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 15px;
+    }
+  
+    .deleted-item-actions {
+      width: 100%;
+      justify-content: flex-end;
+    }
+  }
+  
+  

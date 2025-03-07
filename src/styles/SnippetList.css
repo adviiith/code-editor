@@ -1,0 +1,211 @@
+.snippet-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.snippet-list-header {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.snippet-list-header h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.snippet-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  align-items: center;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background-color: var(--surface-color);
+  flex: 1;
+  min-width: 200px;
+}
+
+.search-box input {
+  padding: 10px 0;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  width: 100%;
+}
+
+.filter-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.filter-controls select {
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background-color: var(--surface-color);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.no-snippets {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 50px 0;
+  text-align: center;
+}
+
+.create-snippet-button {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.create-snippet-button:hover {
+  background-color: var(--primary-hover);
+  text-decoration: none;
+}
+
+.snippet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.snippet-card {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: var(--surface-color);
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.snippet-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.snippet-card-header {
+  padding: 15px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.snippet-card-header h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.snippet-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.language-badge {
+  font-size: 0.7rem;
+  padding: 3px 8px;
+  border-radius: 12px;
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.category-badge {
+  font-size: 0.7rem;
+  padding: 3px 8px;
+  border-radius: 12px;
+  background-color: var(--secondary-color);
+  color: white;
+}
+
+/* Add folder badge styles */
+.folder-badge {
+  font-size: 0.7rem;
+  padding: 3px 8px;
+  border-radius: 12px;
+  background-color: var(--border-color);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.snippet-card-body {
+  padding: 15px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.snippet-summary {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 15px;
+  flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.snippet-date {
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+}
+
+.snippet-card-actions {
+  display: flex;
+  border-top: 1px solid var(--border-color);
+}
+
+.edit-button,
+.delete-button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  font-size: 0.9rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.edit-button {
+  color: var(--primary-color);
+  border-right: 1px solid var(--border-color);
+}
+
+.edit-button:hover {
+  background-color: rgba(79, 70, 229, 0.1);
+  text-decoration: none;
+}
+
+.delete-button {
+  color: var(--danger-color);
+}
+
+.delete-button:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+}
+

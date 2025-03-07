@@ -1,0 +1,304 @@
+.settings-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  
+  .settings-modal {
+    background-color: var(--background-color);
+    border-radius: 8px;
+    box-shadow: var(--shadow-lg);
+    width: 90%;
+    max-width: 700px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  
+  .settings-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .settings-modal-header h2 {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+  }
+  
+  .close-button {
+    background: none;
+    border: none;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+  }
+  
+  .close-button:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--text-primary);
+  }
+  
+  .settings-modal-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border-color);
+    overflow-x: auto;
+  }
+  
+  .settings-tab {
+    padding: 12px 20px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+  
+  .settings-tab:hover {
+    color: var(--primary-color);
+  }
+  
+  .settings-tab.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+  }
+  
+  .settings-modal-content {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+  }
+  
+  .settings-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .setting-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .setting-item label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+  
+  .setting-item input[type="text"],
+  .setting-item input[type="password"],
+  .setting-item select {
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: var(--background-color);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+  }
+  
+  .setting-description {
+    font-size: 0.8rem;
+    color: var(--text-tertiary);
+  }
+  
+  .range-input-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .range-input-container input[type="range"] {
+    flex: 1;
+  }
+  
+  .range-value {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    min-width: 40px;
+    text-align: right;
+  }
+  
+  .settings-modal-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-top: 1px solid var(--border-color);
+  }
+  
+  .save-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .save-button:hover {
+    background-color: var(--primary-hover);
+  }
+  
+  .save-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+  
+  .save-message {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+  }
+  
+  /* Toggle switch */
+  .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+    align-self: flex-start;
+  }
+  
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .toggle-switch label {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--border-color);
+    transition: .4s;
+    border-radius: 24px;
+  }
+  
+  .toggle-switch label:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+  }
+  
+  .toggle-switch input:checked + label {
+    background-color: var(--primary-color);
+  }
+  
+  .toggle-switch input:checked + label:before {
+    transform: translateX(26px);
+  }
+  
+  /* Theme mode selector */
+  .theme-mode-selector {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .theme-mode-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 15px;
+    background-color: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .theme-mode-button.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+  }
+  
+  /* Color theme selector */
+  .color-theme-selector {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+  }
+  
+  .color-theme-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 15px 10px;
+    background-color: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+  
+  .color-theme-button.active {
+    border-color: var(--primary-color);
+    background-color: rgba(79, 70, 229, 0.1);
+  }
+  
+  .color-theme-button.default .check-icon {
+    color: var(--primary-color);
+  }
+  
+  .color-theme-button.blue .check-icon {
+    color: #3b82f6;
+  }
+  
+  .color-theme-button.green .check-icon {
+    color: #10b981;
+  }
+  
+  .color-theme-button.purple .check-icon {
+    color: #8b5cf6;
+  }
+  
+  .color-theme-button.orange .check-icon {
+    color: #f59e0b;
+  }
+  
+  .check-icon {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+  }
+  
+  
