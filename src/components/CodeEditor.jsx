@@ -26,9 +26,15 @@ const CodeEditor = ({ saveSnippet, folders, createFolder }) => {
   const [autoSaveTimeout, setAutoSaveTimeout] = useState(null)
   const [editorFontSize, setEditorFontSize] = useState(14)
   const [editorTheme, setEditorTheme] = useState("light")
+  const [suggestions, setSuggestions] = useState([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 })
+  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(0)
+  const [autoSuggestionTimeout, setAutoSuggestionTimeout] = useState(null)
 
   const codeTextareaRef = useRef(null)
   const editorRef = useRef(null)
+  const suggestionsRef = useRef(null)
 
   // Default code templates based on language
   useEffect(() => {
@@ -424,10 +430,336 @@ const CodeEditor = ({ saveSnippet, folders, createFolder }) => {
     return /[{([][ \t]*$/.test(line)
   }
 
-  // Handle key events in the editor
+  const getKeywordSuggestions = (currentWord, language) => {
+    // Common programming keywords by language
+    const keywords = {
+      cpp: [
+        // C++ keywords
+        "auto",
+        "break",
+        "case",
+        "class",
+        "const",
+        "continue",
+        "default",
+        "do",
+        "double",
+        "else",
+        "enum",
+        "extern",
+        "float",
+        "for",
+        "goto",
+        "if",
+        "int",
+        "long",
+        "namespace",
+        "new",
+        "private",
+        "protected",
+        "public",
+        "return",
+        "short",
+        "signed",
+        "sizeof",
+        "static",
+        "struct",
+        "switch",
+        "template",
+        "this",
+        "throw",
+        "try",
+        "typedef",
+        "union",
+        "unsigned",
+        "virtual",
+        "void",
+        "volatile",
+        "while",
+        // C++ common functions and libraries
+        "cout",
+        "cin",
+        "endl",
+        "vector",
+        "string",
+        "map",
+        "set",
+        "algorithm",
+        "include",
+        "push_back",
+        "begin",
+        "end",
+        "size",
+        "empty",
+        "clear",
+        "find",
+        "insert",
+        "erase",
+        "sort",
+        "reverse",
+        "max",
+        "min",
+        "pair",
+        "make_pair",
+        "iterator",
+        "const_iterator",
+        "iostream",
+        "fstream",
+        "sstream",
+        "cmath",
+        "cstdlib",
+        "ctime",
+        "cstring",
+        "cctype",
+      ],
+      java: [
+        // Java keywords
+        "System.out.println();",
+        "abstract",
+        "assert",
+        "boolean",
+        "break",
+        "byte",
+        "case",
+        "catch",
+        "char",
+        "class",
+        "const",
+        "continue",
+        "default",
+        "do",
+        "double",
+        "else",
+        "enum",
+        "extends",
+        "final",
+        "finally",
+        "float",
+        "for",
+        "goto",
+        "if",
+        "int",
+        "implements",
+        "import",
+        "instanceof",
+        "int",
+        "interface",
+        "long",
+        "native",
+        "new",
+        "package",
+        "private",
+        "protected",
+        "public",
+        "return",
+        "short",
+        "static",
+        "strictfp",
+        "super",
+        "switch",
+        "synchronized",
+        "this",
+        "throw",
+        "throws",
+        "transient",
+        "try",
+        "void",
+        "volatile",
+        "while",
+        // Java common classes and methods
+        "String",
+        "System",
+        "ArrayList",
+        "HashMap",
+        "List",
+        "Map",
+        "Set",
+        "Exception",
+        "Integer",
+        "Double",
+        "Boolean",
+        "Character",
+        "Math",
+        "Object",
+        "Thread",
+        "Runnable",
+        "Override",
+        "Deprecated",
+        "SuppressWarnings",
+        "Collections",
+        "Arrays",
+        "File",
+        "IOException",
+        "Scanner",
+        "PrintWriter",
+        "StringBuilder",
+        "StringBuffer",
+        "equals",
+        "toString",
+        "hashCode",
+        "compareTo",
+        "length",
+        "size",
+        "add",
+        "remove",
+        "get",
+        "set",
+        "contains",
+        "isEmpty",
+        "println",
+        "print",
+        "format",
+        "valueOf",
+        "parseInt",
+        "parseDouble",
+      ],
+      python: [
+        // Python keywords
+        "and",
+        "as",
+        "assert",
+        "async",
+        "await",
+        "break",
+        "class",
+        "continue",
+        "def",
+        "del",
+        "elif",
+        "else",
+        "except",
+        "False",
+        "finally",
+        "for",
+        "from",
+        "global",
+        "if",
+        "import",
+        "in",
+        "is",
+        "lambda",
+        "None",
+        "nonlocal",
+        "not",
+        "or",
+        "pass",
+        "raise",
+        "return",
+        "True",
+        "try",
+        "while",
+        "with",
+        "yield",
+        // Python common functions and libraries
+        "print",
+        "len",
+        "range",
+        "list",
+        "dict",
+        "set",
+        "tuple",
+        "str",
+        "int",
+        "float",
+        "bool",
+        "open",
+        "read",
+        "write",
+        "append",
+        "close",
+        "split",
+        "join",
+        "strip",
+        "replace",
+        "format",
+        "sorted",
+        "reversed",
+        "enumerate",
+        "zip",
+        "map",
+        "filter",
+        "sum",
+        "min",
+        "max",
+        "abs",
+        "type",
+        "isinstance",
+        "dir",
+        "help",
+        "input",
+        "super",
+        "self",
+        "__init__",
+        "__str__",
+        "numpy",
+        "pandas",
+        "matplotlib",
+        "sklearn",
+        "tensorflow",
+        "torch",
+        "django",
+        "flask",
+        "requests",
+        "json",
+        "os",
+        "sys",
+        "datetime",
+        "random",
+        "math",
+        "re",
+        "collections",
+      ],
+    }
+
+    // Filter keywords that match the current word (case insensitive)
+    const lowerCurrentWord = currentWord.toLowerCase()
+    return keywords[language]
+      .filter((keyword) => keyword.toLowerCase().startsWith(lowerCurrentWord))
+      .sort((a, b) => {
+        // Sort exact matches first, then by length (shorter first), then alphabetically
+        const aExact = a.toLowerCase() === lowerCurrentWord
+        const bExact = b.toLowerCase() === lowerCurrentWord
+
+        if (aExact && !bExact) return -1
+        if (!aExact && bExact) return 1
+
+        // If both are exact or both are not exact, sort by length
+        if (a.length !== b.length) return a.length - b.length
+
+        // If same length, sort alphabetically
+        return a.localeCompare(b)
+      })
+      .slice(0, 10) // Limit to 10 suggestions for better performance
+  }
+
   const handleKeyDown = (e) => {
     if (e.key === "Tab") {
       e.preventDefault()
+
+      // If suggestions are shown and one is selected, use it
+      if (showSuggestions && suggestions.length > 0) {
+        const suggestion = suggestions[0]
+        const start = e.target.selectionStart
+        const textBeforeCursor = code.substring(0, start)
+
+        // Find the start of the current word
+        const wordStartRegex = /[a-zA-Z0-9_]*$/
+        const currentWordMatch = textBeforeCursor.match(wordStartRegex)
+        const currentWord = currentWordMatch ? currentWordMatch[0] : ""
+        const wordStart = start - currentWord.length
+
+        // Replace only the current word with the suggestion
+        const newCode = code.substring(0, wordStart) + suggestion + code.substring(start)
+        setCode(newCode)
+
+        // Move cursor to the end of the inserted suggestion
+        setTimeout(() => {
+          e.target.selectionStart = e.target.selectionEnd = wordStart + suggestion.length
+        }, 0)
+
+        setShowSuggestions(false)
+        return
+      }
 
       const start = e.target.selectionStart
       const end = e.target.selectionEnd
@@ -469,68 +801,272 @@ const CodeEditor = ({ saveSnippet, folders, createFolder }) => {
         const newPosition = start + 1 + indentation.length
         e.target.selectionStart = e.target.selectionEnd = newPosition
       }, 0)
+
+      setShowSuggestions(false)
     } else if (e.key === "{") {
       // Auto-complete curly braces
       e.preventDefault()
 
       const start = e.target.selectionStart
-      const newCode = code.substring(0, start) + "{}" + code.substring(start)
-      setCode(newCode)
+      const end = e.target.selectionEnd
 
-      // Place cursor between braces
-      setTimeout(() => {
-        e.target.selectionStart = e.target.selectionEnd = start + 1
-      }, 0)
+      // If text is selected, wrap it in braces
+      if (start !== end) {
+        const selectedText = code.substring(start, end)
+        const newCode = code.substring(0, start) + "{" + selectedText + "}" + code.substring(end)
+        setCode(newCode)
+
+        // Place cursor after the closing brace
+        setTimeout(() => {
+          e.target.selectionStart = e.target.selectionEnd = end + 2
+        }, 0)
+      } else {
+        const newCode = code.substring(0, start) + "{}" + code.substring(start)
+        setCode(newCode)
+
+        // Place cursor between braces
+        setTimeout(() => {
+          e.target.selectionStart = e.target.selectionEnd = start + 1
+        }, 0)
+      }
+
+      setShowSuggestions(false)
     } else if (e.key === "(") {
       // Auto-complete parentheses
       e.preventDefault()
 
       const start = e.target.selectionStart
-      const newCode = code.substring(0, start) + "()" + code.substring(start)
-      setCode(newCode)
+      const end = e.target.selectionEnd
 
-      // Place cursor between parentheses
-      setTimeout(() => {
-        e.target.selectionStart = e.target.selectionEnd = start + 1
-      }, 0)
+      // If text is selected, wrap it in parentheses
+      if (start !== end) {
+        const selectedText = code.substring(start, end)
+        const newCode = code.substring(0, start) + "(" + selectedText + ")" + code.substring(end)
+        setCode(newCode)
+
+        // Place cursor after the closing parenthesis
+        setTimeout(() => {
+          e.target.selectionStart = e.target.selectionEnd = end + 2
+        }, 0)
+      } else {
+        const newCode = code.substring(0, start) + "()" + code.substring(start)
+        setCode(newCode)
+
+        // Place cursor between parentheses
+        setTimeout(() => {
+          e.target.selectionStart = e.target.selectionEnd = start + 1
+        }, 0)
+      }
+
+      setShowSuggestions(false)
     } else if (e.key === "[") {
       // Auto-complete square brackets
       e.preventDefault()
 
       const start = e.target.selectionStart
-      const newCode = code.substring(0, start) + "[]" + code.substring(start)
-      setCode(newCode)
+      const end = e.target.selectionEnd
 
-      // Place cursor between brackets
-      setTimeout(() => {
-        e.target.selectionStart = e.target.selectionEnd = start + 1
-      }, 0)
+      // If text is selected, wrap it in brackets
+      if (start !== end) {
+        const selectedText = code.substring(start, end)
+        const newCode = code.substring(0, start) + "[" + selectedText + "]" + code.substring(end)
+        setCode(newCode)
+
+        // Place cursor after the closing bracket
+        setTimeout(() => {
+          e.target.selectionStart = e.target.selectionEnd = end + 2
+        }, 0)
+      } else {
+        const newCode = code.substring(0, start) + "[]" + code.substring(start)
+        setCode(newCode)
+
+        // Place cursor between brackets
+        setTimeout(() => {
+          e.target.selectionStart = e.target.selectionEnd = start + 1
+        }, 0)
+      }
+
+      setShowSuggestions(false)
     } else if (e.key === '"') {
       // Auto-complete double quotes
       e.preventDefault()
 
       const start = e.target.selectionStart
-      const newCode = code.substring(0, start) + '""' + code.substring(start)
-      setCode(newCode)
+      const end = e.target.selectionEnd
 
-      // Place cursor between quotes
-      setTimeout(() => {
-        e.target.selectionStart = e.target.selectionEnd = start + 1
-      }, 0)
+      // If text is selected, wrap it in quotes
+      if (start !== end) {
+        const selectedText = code.substring(start, end)
+        const newCode = code.substring(0, start) + '"' + selectedText + '"' + code.substring(end)
+        setCode(newCode)
+
+        // Place cursor after the closing quote
+        setTimeout(() => {
+          e.target.selectionStart = e.target.selectionEnd = end + 2
+        }, 0)
+      } else {
+        const newCode = code.substring(0, start) + '""' + code.substring(start)
+        setCode(newCode)
+
+        // Place cursor between quotes
+        setTimeout(() => {
+          e.target.selectionStart = e.target.selectionEnd = start + 1
+        }, 0)
+      }
+
+      setShowSuggestions(false)
     } else if (e.key === "'") {
       // Auto-complete single quotes
       e.preventDefault()
 
       const start = e.target.selectionStart
-      const newCode = code.substring(0, start) + "''" + code.substring(start)
-      setCode(newCode)
+      const end = e.target.selectionEnd
 
-      // Place cursor between quotes
-      setTimeout(() => {
-        e.target.selectionStart = e.target.selectionEnd = start + 1
-      }, 0)
+      // If text is selected, wrap it in quotes
+      if (start !== end) {
+        const selectedText = code.substring(start, end)
+        const newCode = code.substring(0, start) + "'" + selectedText + "'" + code.substring(end)
+        setCode(newCode)
+
+        // Place cursor after the closing quote
+        setTimeout(() => {
+          e.target.selectionStart = e.target.selectionEnd = end + 2
+        }, 0)
+      } else {
+        const newCode = code.substring(0, start) + "''" + code.substring(start)
+        setCode(newCode)
+
+        // Place cursor between quotes
+        setTimeout(() => {
+          e.target.selectionStart = e.target.selectionEnd = start + 1
+        }, 0)
+      }
+
+      setShowSuggestions(false)
+    } else if (e.key === "Escape") {
+      // Hide suggestions on escape
+      setShowSuggestions(false)
+    } else if (e.key === "ArrowDown" && showSuggestions) {
+      // Navigate through suggestions
+      e.preventDefault()
+      // Implement suggestion navigation
+      const nextIndex = Math.min(selectedSuggestionIndex + 1, suggestions.length - 1)
+      setSelectedSuggestionIndex(nextIndex)
+    } else if (e.key === "ArrowUp" && showSuggestions) {
+      // Navigate through suggestions
+      e.preventDefault()
+      // Implement suggestion navigation
+      const prevIndex = Math.max(selectedSuggestionIndex - 1, 0)
+      setSelectedSuggestionIndex(prevIndex)
+    } else if (e.key === "Enter" && showSuggestions) {
+      // Select the current suggestion
+      e.preventDefault()
+      if (suggestions.length > 0) {
+        const suggestion = suggestions[selectedSuggestionIndex]
+        const start = e.target.selectionStart
+        const textBeforeCursor = code.substring(0, start)
+
+        // Find the start of the current word
+        const wordStartRegex = /[a-zA-Z0-9_]*$/
+        const currentWordMatch = textBeforeCursor.match(wordStartRegex)
+        const currentWord = currentWordMatch ? currentWordMatch[0] : ""
+        const wordStart = start - currentWord.length
+
+        // Replace only the current word with the suggestion
+        const newCode = code.substring(0, wordStart) + suggestion + code.substring(start)
+        setCode(newCode)
+
+        // Move cursor to the end of the inserted suggestion
+        setTimeout(() => {
+          e.target.selectionStart = e.target.selectionEnd = wordStart + suggestion.length
+        }, 0)
+
+        setShowSuggestions(false)
+      }
+    } else {
+      // For any other key, check if we should show suggestions
+      // Use a shorter timeout for faster suggestions
+      if (autoSuggestionTimeout) {
+        clearTimeout(autoSuggestionTimeout)
+      }
+
+      const timeout = setTimeout(() => {
+        const cursorPos = e.target.selectionStart
+        const textBeforeCursor = code.substring(0, cursorPos)
+
+        // Find the current word being typed
+        const wordStartRegex = /[a-zA-Z0-9_]*$/
+        const currentWordMatch = textBeforeCursor.match(wordStartRegex)
+        const currentWord = currentWordMatch ? currentWordMatch[0] : ""
+
+        // Only show suggestions if the current word is at least 2 characters
+        if (currentWord && currentWord.length >= 2) {
+          const newSuggestions = getKeywordSuggestions(currentWord, language)
+
+          if (newSuggestions.length > 0) {
+            setSuggestions(newSuggestions)
+            setSelectedSuggestionIndex(0)
+            setShowSuggestions(true)
+
+            // Calculate position for suggestion box
+            const textareaRect = e.target.getBoundingClientRect()
+            const lineHeight = Number.parseInt(getComputedStyle(e.target).lineHeight)
+
+            // Count newlines up to cursor to determine vertical position
+            const textBeforeCursorLines = textBeforeCursor.split("\n")
+            const currentLineNumber = textBeforeCursorLines.length - 1
+            const currentLineText = textBeforeCursorLines[currentLineNumber]
+
+            // Calculate horizontal position based on character width
+            const charWidth = editorFontSize * 0.6 // Approximate character width based on font size
+            const horizontalPos = Math.min(
+              currentLineText.length * charWidth,
+              textareaRect.width - 200, // Keep suggestion box within editor width
+            )
+
+            setCursorPosition({
+              x: horizontalPos,
+              y: currentLineNumber * lineHeight,
+            })
+          } else {
+            setShowSuggestions(false)
+          }
+        } else {
+          setShowSuggestions(false)
+        }
+      }, 100) // Reduced timeout for faster suggestions
+
+      setAutoSuggestionTimeout(timeout)
     }
   }
+
+  const highlightSyntax = () => {
+    // This is a placeholder for real syntax highlighting
+    // In a production environment, you would use a library like Prism.js or highlight.js
+    // For now, we'll rely on the CSS classes we've defined
+  }
+
+  useEffect(() => {
+    if (!codeTextareaRef.current) return
+
+    // Apply syntax highlighting
+    highlightSyntax()
+
+    // Add event listener for scroll to sync line numbers
+    const handleScroll = () => {
+      if (document.querySelector(".line-numbers")) {
+        document.querySelector(".line-numbers").scrollTop = codeTextareaRef.current.scrollTop
+      }
+    }
+
+    codeTextareaRef.current.addEventListener("scroll", handleScroll)
+
+    return () => {
+      if (codeTextareaRef.current) {
+        codeTextareaRef.current.removeEventListener("scroll", handleScroll)
+      }
+    }
+  }, [code, language, editorTheme])
 
   return (
     <div className="code-editor-container">
@@ -627,6 +1163,13 @@ const CodeEditor = ({ saveSnippet, folders, createFolder }) => {
 
       <div className="editor-body">
         <div className="code-area" ref={editorRef}>
+          <div className="line-numbers">
+            {code.split("\n").map((_, index) => (
+              <div key={index} className="line-number">
+                {index + 1}
+              </div>
+            ))}
+          </div>
           <textarea
             ref={codeTextareaRef}
             value={code}
@@ -636,6 +1179,53 @@ const CodeEditor = ({ saveSnippet, folders, createFolder }) => {
             placeholder="Write your code here..."
             spellCheck="false"
           />
+          {showSuggestions && suggestions.length > 0 && (
+            <div
+              className="suggestions-container"
+              style={{
+                position: "absolute",
+                left: `${cursorPosition.x}px`,
+                top: `${cursorPosition.y + 20}px`,
+                zIndex: 10,
+              }}
+              ref={suggestionsRef}
+            >
+              <ul className="suggestions-list">
+                {suggestions.map((suggestion, index) => (
+                  <li
+                    key={index}
+                    className={index === selectedSuggestionIndex ? "selected" : ""}
+                    onClick={() => {
+                      // Insert the suggestion
+                      const start = codeTextareaRef.current.selectionStart
+                      const textBeforeCursor = code.substring(0, start)
+
+                      // Find the start of the current word
+                      const wordStartRegex = /[a-zA-Z0-9_]*$/
+                      const currentWordMatch = textBeforeCursor.match(wordStartRegex)
+                      const currentWord = currentWordMatch ? currentWordMatch[0] : ""
+                      const wordStart = start - currentWord.length
+
+                      // Replace only the current word with the suggestion
+                      const newCode = code.substring(0, wordStart) + suggestion + code.substring(start)
+                      setCode(newCode)
+
+                      // Move cursor to the end of the inserted suggestion
+                      setTimeout(() => {
+                        codeTextareaRef.current.selectionStart = codeTextareaRef.current.selectionEnd =
+                          wordStart + suggestion.length
+                        codeTextareaRef.current.focus()
+                      }, 0)
+
+                      setShowSuggestions(false)
+                    }}
+                  >
+                    {suggestion}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
 
         <div className="editor-actions">
