@@ -65,6 +65,54 @@ const CodeEditor = ({ saveSnippet, folders, createFolder }) => {
     setEditorTheme(savedEditorTheme)
   }, [language, folders])
 
+  const debouncedSuggestions = useCallback(
+    debounce((text, position) => {
+      const beforeCursor = text.substring(0, position);
+      const match = beforeCursor.match(/[\w\d_]*$/);
+      if (match && match[0].length >= 2) {
+        const prefix = match[0].toLowerCase();
+        const newSuggestions = getKeywordSuggestions(prefix, language)
+          .slice(0, 10)
+          .sort((a, b) => {
+            if (a.toLowerCase().startsWith(prefix) && !b.toLowerCase().startsWith(prefix)) return -1;
+            if (!a.toLowerCase().startsWith(prefix) && b.toLowerCase().startsWith(prefix)) return 1;
+            return a.length - b.length;
+          });
+
+        setSuggestions(newSuggestions);
+        setShowSuggestions(newSuggestions.length > 0);
+      } else {
+        setShowSuggestions(false);
+      }
+    }, 50),
+    [language]
+  );
+
+  const handleInput = useCallback((e) => {
+    const value = e.target.value;
+    setCode(value);
+
+    // Update syntax highlighting
+    if (codeTextareaRef.current) {
+      const highlighted = highlightSyntax(value);
+      const preview = document.createElement('div');
+      preview.innerHTML = highlighted;
+      codeTextareaRef.current.style.color = 'transparent';
+      codeTextareaRef.current.style.caretColor = 'black';
+      preview.style.position = 'absolute';
+      preview.style.top = '0';
+      preview.style.left = '0';
+      preview.style.pointerEvents = 'none';
+      preview.style.whiteSpace = 'pre-wrap';
+      preview.style.fontFamily = 'monospace';
+      editorRef.current.appendChild(preview);
+    }
+
+    // Update suggestions
+    debouncedSuggestions(value, e.target.selectionStart);
+  }, [debouncedSuggestions]);
+
+
   // Set up enhanced editor with syntax highlighting and auto-parenthesis
   useEffect(() => {
     if (!codeTextareaRef.current) return
@@ -408,6 +456,35 @@ const CodeEditor = ({ saveSnippet, folders, createFolder }) => {
       setError("Failed to generate PDF. Please try again.")
     }
   }
+
+  const findMatchingBracket = (code, pos) => {
+    const brackets = {
+      '(': ')',
+      '{': '}',
+      '[': ']',
+      ')': '(',
+      '}': '{',
+      ']': '['
+    };
+
+    const char = code[pos];
+    if (!brackets[char]) return -1;
+
+    const isClosing = [')', '}', ']'].includes(char);
+    const increment = isClosing ? -1 : 1;
+    let count = 0;
+
+    for (let i = pos + increment; i >= 0 && i < code.length; i += increment) {
+      const current = code[i];
+      if (current === char) count++;
+      if (current === brackets[char]) {
+        if (count === 0) return i;
+        count--;
+      }
+    }
+
+    return -1;
+  };
 
   const handleCreateFolder = () => {
     if (newFolderName.trim()) {
@@ -1040,11 +1117,124 @@ const CodeEditor = ({ saveSnippet, folders, createFolder }) => {
     }
   }
 
-  const highlightSyntax = () => {
-    // This is a placeholder for real syntax highlighting
-    // In a production environment, you would use a library like Prism.js or highlight.js
-    // For now, we'll rely on the CSS classes we've defined
-  }
+  const highlightSyntax = (code) => {
+    const keywords = {
+      cpp: ['auto', 'break', 'case', 'class', 'const', 'continue', 'default', 'do', 'double', 
+            'else', 'enum', 'extern', 'float', 'for', 'goto', 'if', 'int', 'long', 'register', 
+            'return', 'short', 'signed', 'sizeof', 'static', 'struct', 'switch', 'typedef', 
+            'union', 'unsigned', 'void', 'volatile', 'while'],
+      java: ['abstract', 'assert', 'boolean', 'break', 'byte', 'case', 'catch', 'char', 'class', 
+             'const', 'continue', 'default', 'do', 'double', 'else', 'enum', 'extends', 'final', 
+             'finally', 'float', 'for', 'if', 'implements', 'import', 'instanceof', 'int', 
+             'interface', 'long', 'native', 'new', 'package', 'private', 'protected', 'public', 
+             'return', 'short', 'static', 'strictfp', 'super', 'switch', 'synchronized', 'this', 
+             'throw', 'throws', 'transient', 'try', 'void', 'volatile', 'while'],
+      python: ['and', 'as', 'assert', 'async', 'await', 'break', 'class', 'continue', 'def', 
+               'del', 'elif', 'else', 'except', 'False', 'finally', 'for', 'from', 'global', 
+               'if', 'import', 'in', 'is', 'lambda', 'None', 'nonlocal', 'not', 'or', 'pass', 
+               'raise', 'return', 'True', 'try', 'while', 'with', 'yield']
+    };
+
+    const tokenize = (code) => {
+      const tokens = [];
+      let current = '';
+      let inString = false;
+      let inComment = false;
+      let stringChar = '';
+
+      for (let i = 0; i < code.length; i++) {
+        const char = code[i];
+        const nextChar = code[i + 1];
+
+        if (inComment) {
+          if (char === '\n') {
+            tokens.push({ type: 'comment', value: current });
+            current = '';
+            inComment = false;
+          } else {
+            current += char;
+          }
+          continue;
+        }
+
+        if (inString) {
+          if (char === stringChar && code[i - 1] !== '\\') {
+            current += char;
+            tokens.push({ type: 'string', value: current });
+            current = '';
+            inString = false;
+          } else {
+            current += char;
+          }
+          continue;
+        }
+
+        if ((char === '"' || char === "'") && !inString) {
+          if (current) {
+            tokens.push({ type: 'code', value: current });
+            current = '';
+          }
+          inString = true;
+          stringChar = char;
+          current += char;
+          continue;
+        }
+
+        if (char === '/' && nextChar === '/') {
+          if (current) {
+            tokens.push({ type: 'code', value: current });
+            current = '';
+          }
+          inComment = true;
+          i++; // Skip next character
+          continue;
+        }
+
+        if (/[\s\(\)\{\}\[\]\;\,\+\-\*\/\=\<\>\!\&\|\^\%\~\?\:\.]/.test(char)) {
+          if (current) {
+            tokens.push({ type: 'code', value: current });
+            current = '';
+          }
+          tokens.push({ type: 'punctuation', value: char });
+        } else {
+          current += char;
+        }
+      }
+
+      if (current) {
+        tokens.push({ type: inComment ? 'comment' : 'code', value: current });
+      }
+
+      return tokens;
+    };
+
+    const colorize = (tokens) => {
+      return tokens.map(token => {
+        if (token.type === 'string') {
+          return `<span class="string">${token.value}</span>`;
+        }
+        if (token.type === 'comment') {
+          return `<span class="comment">${token.value}</span>`;
+        }
+        if (token.type === 'code') {
+          const words = token.value.split(/(\s+)/);
+          return words.map(word => {
+            if (keywords[language].includes(word)) {
+              return `<span class="keyword">${word}</span>`;
+            }
+            if (/^\d+$/.test(word)) {
+              return `<span class="number">${word}</span>`;
+            }
+            return word;
+          }).join('');
+        }
+        return token.value;
+      }).join('');
+    };
+
+    const tokens = tokenize(code);
+    return colorize(tokens);
+  };
 
   useEffect(() => {
     if (!codeTextareaRef.current) return
@@ -1290,6 +1480,18 @@ const CodeEditor = ({ saveSnippet, folders, createFolder }) => {
       )}
     </div>
   )
+}
+
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
 }
 
 export default CodeEditor

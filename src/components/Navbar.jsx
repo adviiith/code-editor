@@ -16,7 +16,7 @@ const Navbar = ({ darkMode, setDarkMode, openSettings }) => {
     <nav className="navbar">
       <div className="navbar-brand">
         <Code size={24} />
-        <h1>Code 22G</h1>
+        <h1>CodeBox</h1>
       </div>
 
       <div className={`navbar-menu ${menuOpen ? "active" : ""}`}>
